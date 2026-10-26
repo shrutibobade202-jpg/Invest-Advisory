@@ -28,8 +28,24 @@ chroma_db/
 #**/chroma_db/
 
 # Local datasets and downloaded data
+# Exclude local/generated backend data, but keep required datasets
 backend/data/
+!backend/data/
+!backend/data/mutual_funds/
+!backend/data/mutual_funds/*.csv
+!backend/data/structure/
+!backend/data/structure/*.csv
+
+# Keep project datasets
 data/
+!data/
+!data/mutual_funds/
+!data/mutual_funds/*.csv
+!data/mutual_funds/README.md
+!data/structure/
+!data/structure/*.csv
+!data/tax/
+!data/tax/*.md  
 
 # Exclude older duplicate backend
 backend/goal-invest-advisor/
@@ -71,3 +87,22 @@ htmlcov/
 
 # Preserve local Git history backup outside GitHub
 frontend/.git-backup/
+
+# Exclude generated vector databases
+**/chroma_db/
+
+# Exclude Python virtual environments in nested folders
+**/venv/
+**/.venv/
+
+# Exclude local backup copies
+backup_pre_migration/
+# Exclude generated vector databases
+**/chroma_db/
+
+# Exclude Python virtual environments in any folder
+**/venv/
+**/.venv/
+
+# Exclude local backup copies
+backup_pre_migration/

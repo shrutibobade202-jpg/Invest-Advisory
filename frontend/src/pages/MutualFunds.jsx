@@ -1,66 +1,73 @@
 
 import { useEffect, useState } from "react";
-import { getMutualFunds } from "../api";
+import { getMutualFunds } from "../services/api";
 
-function MutualFunds() {
+
+export default function MutualFunds() {
   const [funds, setFunds] = useState([]);
   const [category, setCategory] = useState("");
   const [riskLevel, setRiskLevel] = useState("");
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const loadFunds = async () => {
-    try {
-      setLoading(true);
-      setError("");
+  async function loadFunds(filters = {}) {
+    setLoading(true);
+    setError("");
 
-      const data = await getMutualFunds(category, riskLevel, search);
-      setFunds(data.funds || data.results || []);
+    try {
+      const data = await getMutualFunds(filters);
+      setFunds(Array.isArray(data) ? data : data.funds || data.results || []);
     } catch (err) {
-      setError(
-        err.message ||
-          "Could not load mutual funds. Please check that the backend is running."
-      );
       setFunds([]);
+      setError(
+        err.response?.data?.detail ||
+          err.message ||
+          "Could not load mutual funds. Check that the backend and dataset are available."
+      );
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
     loadFunds();
   }, []);
 
-  const handleSubmit = (event) => {
+  function handleSubmit(event) {
     event.preventDefault();
-    loadFunds();
-  };
+
+    const filters = {};
+    if (category) filters.category = category;
+    if (riskLevel) filters.risk_level = Number(riskLevel);
+    if (search.trim()) filters.search = search.trim();
+
+    loadFunds(filters);
+  }
 
   return (
-    <div className="mutual-funds-page">
+    <main className="mutual-funds-page">
       <h1>Explore Mutual Funds</h1>
-
       <p>
-        Explore mutual fund data and compare funds by category and risk level.
+        Explore the available mutual fund dataset and compare funds by
+        category, risk level, and historical performance.
       </p>
-
       <p>
-        <strong>Educational information only.</strong> This page does not
-        provide personalized financial advice.
+        <strong>Educational information only.</strong> Historical returns
+        do not guarantee future performance.
       </p>
 
       <form onSubmit={handleSubmit}>
         <input
-          type="text"
+          type="search"
           placeholder="Search fund name..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(event) => setSearch(event.target.value)}
         />
 
         <select
           value={category}
-          onChange={(e) => setCategory(e.target.value)}
+          onChange={(event) => setCategory(event.target.value)}
         >
           <option value="">All Categories</option>
           <option value="Equity">Equity</option>
@@ -72,7 +79,7 @@ function MutualFunds() {
 
         <select
           value={riskLevel}
-          onChange={(e) => setRiskLevel(e.target.value)}
+          onChange={(event) => setRiskLevel(event.target.value)}
         >
           <option value="">All Risk Levels</option>
           <option value="1">Risk Level 1</option>
@@ -80,60 +87,69 @@ function MutualFunds() {
           <option value="3">Risk Level 3</option>
           <option value="4">Risk Level 4</option>
           <option value="5">Risk Level 5</option>
-          <option value="6">Risk Level 6</option>
         </select>
 
         <button type="submit" disabled={loading}>
-          {loading ? "Searching..." : "Search Funds"}
+          {loading ? "Loading..." : "Search Funds"}
         </button>
       </form>
 
-      {loading && <p>Loading mutual funds...</p>}
+      {loading && <p>Loading mutual funds from the backend...</p>}
+
       {error && <p role="alert">{error}</p>}
 
       {!loading && !error && (
-        <div className="funds-grid">
+        <>
+          <p>Funds loaded: {funds.length}</p>
+
           {funds.length === 0 ? (
-            <p>No funds found. Try different filters.</p>
+            <p>No funds found. Try changing your filters.</p>
           ) : (
-            funds.map((fund, index) => (
-              <div
-                className="fund-card"
-                key={`${fund.scheme_name || "fund"}-${index}`}
-              >
-                <h3>{fund.scheme_name || "Unnamed Fund"}</h3>
-
-                <p>Category: {fund.category ?? "Not available"}</p>
-                <p>Risk Level: {fund.risk_level ?? "Not available"}</p>
-                <p>Rating: {fund.rating ?? "Not available"}</p>
-
-                <p>
-                  Minimum SIP:{" "}
-                  {fund.min_sip == null
-                    ? "Not available"
-                    : `₹${fund.min_sip}`}
-                </p>
-
-                <p>
-                  Expense Ratio:{" "}
-                  {fund.expense_ratio == null
-                    ? "Not available"
-                    : `${fund.expense_ratio}%`}
-                </p>
-
-                <p>
-                  3-Year Returns:{" "}
-                  {fund.returns_3yr == null
-                    ? "Not available"
-                    : `${fund.returns_3yr}%`}
-                </p>
-              </div>
-            ))
+            <div className="funds-grid">
+              {funds.map((fund, index) => (
+                <article
+                  className="fund-card"
+                  key={`${fund.scheme_name || "fund"}-${index}`}
+                >
+                  <h3>{fund.scheme_name || "Unnamed Fund"}</h3>
+                  <p>Category: {fund.category ?? "Not available"}</p>
+                  <p>Risk Level: {fund.risk_level ?? "Not available"}</p>
+                  <p>
+                    Minimum SIP:{" "}
+                    {fund.min_sip == null
+                      ? "Not available"
+                      : `₹${Number(fund.min_sip).toLocaleString("en-IN")}`}
+                  </p>
+                  <p>
+                    Expense Ratio:{" "}
+                    {fund.expense_ratio == null
+                      ? "Not available"
+                      : `${fund.expense_ratio}%`}
+                  </p>
+                  <p>
+                    1-Year Returns:{" "}
+                    {fund.returns_1yr == null
+                      ? "Not available"
+                      : `${fund.returns_1yr}%`}
+                  </p>
+                  <p>
+                    3-Year Returns:{" "}
+                    {fund.returns_3yr == null
+                      ? "Not available"
+                      : `${fund.returns_3yr}%`}
+                  </p>
+                  <p>
+                    5-Year Returns:{" "}
+                    {fund.returns_5yr == null
+                      ? "Not available"
+                      : `${fund.returns_5yr}%`}
+                  </p>
+                </article>
+              ))}
+            </div>
           )}
-        </div>
+        </>
       )}
-    </div>
+    </main>
   );
 }
-
-export default MutualFunds;

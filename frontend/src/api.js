@@ -1,84 +1,61 @@
-```javascript
-const API_BASE_URL = "https://goalinvest-advisor.onrender.com";
+
+const API_BASE_URL = "https://goalinvest-advisor-project.onrender.com";
+
+// Helper function for API requests
+async function apiRequest(endpoint, options = {}) {
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `API request failed (${response.status}): ${
+        errorText || response.statusText
+      }`
+    );
+  }
+
+  return response.json();
+}
 
 // AI Assistant
 export async function chatWithAI(message) {
-  const response = await fetch(`${API_BASE_URL}/chat`, {
+  return apiRequest("/chat", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify({ message }),
   });
-
-  if (!response.ok) {
-    throw new Error("Failed to get AI response");
-  }
-
-  return await response.json();
 }
 
-// Goal Planner: Calculate monthly savings
-export async function calculateGoal(data) {
-  const response = await fetch(`${API_BASE_URL}/calculate-goal`, {
+// Goal Calculator
+export async function calculateGoal(goal, target_amount, months) {
+  return apiRequest("/calculate-goal", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
+    body: JSON.stringify({
+      goal,
+      target_amount: Number(target_amount),
+      months: Number(months),
+    }),
   });
-
-  if (!response.ok) {
-    throw new Error("Failed to calculate goal");
-  }
-
-  return await response.json();
 }
 
-// Goal Planner: Get goal advice
-export async function getGoalAdvice(data) {
-  const response = await fetch(`${API_BASE_URL}/goal-advice`, {
+// Goal Advice
+export async function getGoalAdvice(goal, target_amount, months) {
+  return apiRequest("/goal-advice", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
+    body: JSON.stringify({
+      goal,
+      target_amount: Number(target_amount),
+      months: Number(months),
+    }),
   });
-
-  if (!response.ok) {
-    throw new Error("Failed to get goal advice");
-  }
-
-  return await response.json();
 }
 
 // Mutual Funds
-export async function getMutualFunds(
-  category = "",
-  risk_level = "",
-  search = ""
-) {
-  const params = new URLSearchParams();
-
-  if (category) {
-    params.append("category", category);
-  }
-
-  if (risk_level) {
-    params.append("risk_level", risk_level);
-  }
-
-  if (search) {
-    params.append("search", search);
-  }
-
-  const response = await fetch(
-    `${API_BASE_URL}/mutual-funds?${params.toString()}`
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to load mutual funds");
-  }
-
-  return await response.json();
+export async function getMutualFunds() {
+  return apiRequest("/mutual-funds");
 }

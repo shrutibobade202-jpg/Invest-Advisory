@@ -1,8 +1,9 @@
 
 import { useState } from "react";
-import { calculateGoal, getGoalAdvice } from "../api";
+import { calculateGoal, getGoalAdvice } from "../services/api";
+import "./GoalPlanner.css";
 
-function GoalPlanner() {
+export default function GoalPlanner() {
   const [goal, setGoal] = useState("Buy a car");
   const [targetAmount, setTargetAmount] = useState("500000");
   const [months, setMonths] = useState("24");
@@ -20,9 +21,15 @@ function GoalPlanner() {
     const amount = Number(targetAmount);
     const duration = Number(months);
 
-    if (!goal.trim() || amount <= 0 || duration <= 0) {
+    if (
+      !goal.trim() ||
+      !Number.isFinite(amount) ||
+      amount <= 0 ||
+      !Number.isInteger(duration) ||
+      duration <= 0
+    ) {
       setError(
-        "Enter a goal, a positive target amount, and a positive number of months."
+        "Enter a goal, a positive target amount, and a whole number of months."
       );
       return;
     }
@@ -30,60 +37,66 @@ function GoalPlanner() {
     setLoading(true);
 
     try {
-      const data = {
-        goal: goal.trim(),
-        target_amount: amount,
-        months: duration,
-      };
+      const calculation = await calculateGoal(
+        goal.trim(),
+        amount,
+        duration
+      );
 
-      const calculation = await calculateGoal(data);
       setResult(calculation);
 
       try {
-        const adviceResult = await getGoalAdvice(data);
+        const adviceResult = await getGoalAdvice(
+          goal.trim(),
+          amount,
+          duration
+        );
+
         setAdvice(
           typeof adviceResult === "string"
             ? adviceResult
-            : adviceResult.advice || adviceResult.message || ""
+            : adviceResult?.advice || adviceResult?.message || ""
         );
       } catch {
-        setAdvice("");
+        setAdvice(
+          "Goal advice is temporarily unavailable. Your calculation is still available."
+        );
       }
     } catch (err) {
       setError(
-        err.message ||
-          "Unable to calculate your goal. Please check that the backend is running."
+        err.response?.data?.detail ||
+          err.message ||
+          "Unable to calculate your goal. Please check the backend connection."
       );
     } finally {
       setLoading(false);
     }
   }
 
-  const monthlyAmount =
-    result === null
-      ? 0
-      : Number(
+  const monthlyAmount = result
+    ? Number(
+        result.monthly_saving_required ??
           result.monthly_saving ??
-            result.monthly_savings ??
-            result.monthly_amount ??
-            result.monthly_required ??
-            result.monthly_investment ??
-            result.monthly_savings_required ??
-            Number(targetAmount) / Number(months)
-        );
+          result.monthly_savings ??
+          result.monthly_amount ??
+          result.monthly_required ??
+          result.monthly_investment ??
+          Number(targetAmount) / Number(months)
+      )
+    : 0;
 
   return (
-    <div className="goal-planner-page">
-      <div className="goal-planner-content">
+    <main className="goal-planner-page">
+      <section className="goal-planner-content">
         <header className="goal-planner-header">
           <h1>Goal Planner</h1>
           <p>
-            Turn your financial dreams into achievable goals. Plan how much
-            you need to save each month.
+            Turn your financial dreams into achievable goals.
+            Plan how much you need to save each month.
           </p>
           <p className="goal-planner-disclaimer">
-            <strong>Educational information only.</strong> This estimate is
-            not personalized financial advice.
+            <strong>Educational information only.</strong>{" "}
+            This estimate is not personalized financial advice.
           </p>
         </header>
 
@@ -136,7 +149,7 @@ function GoalPlanner() {
           </div>
         )}
 
-        {result !== null && (
+        {result && (
           <section className="goal-result" aria-live="polite">
             <h2>Your Goal Plan</h2>
             <p>
@@ -160,8 +173,8 @@ function GoalPlanner() {
                 })}
               </h3>
               <p>
-                This simple estimate divides your target amount by the
-                number of months, without assuming investment returns.
+                This estimate divides your target amount by the number
+                of months and does not assume investment returns.
               </p>
             </div>
 
@@ -173,9 +186,7 @@ function GoalPlanner() {
             )}
           </section>
         )}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
-
-export default GoalPlanner;

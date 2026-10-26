@@ -1,0 +1,122 @@
+
+.goal-planner-page {
+  min-height: 100vh;
+  padding: 40px 20px;
+  background: #f4f7fc;
+  box-sizing: border-box;
+}
+
+.goal-planner-content {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.goal-planner-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.goal-planner-header h1 {
+  color: #173b70;
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+
+.goal-planner-header p {
+  color: #64748b;
+  line-height: 1.7;
+}
+
+.goal-planner-disclaimer {
+  font-size: 14px;
+}
+
+.goal-planner-form,
+.goal-result {
+  padding: 28px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(23, 59, 112, 0.07);
+  margin-bottom: 24px;
+}
+
+.goal-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.goal-form-field label {
+  font-weight: 600;
+  color: #243247;
+}
+
+.goal-form-field input {
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.goal-planner-form button {
+  width: 100%;
+  padding: 14px;
+  background: #173b70;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.goal-planner-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.goal-result h2,
+.goal-result h3 {
+  color: #173b70;
+}
+
+.monthly-savings-card {
+  padding: 20px;
+  margin-top: 20px;
+  background: #eff6ff;
+  border-radius: 12px;
+}
+
+.monthly-savings-card h3 {
+  font-size: 30px;
+  margin: 12px 0;
+}
+
+.goal-planner-error {
+  padding: 14px;
+  margin-bottom: 20px;
+  color: #b91c1c;
+  background: #fef2f2;
+  border-radius: 8px;
+}
+
+.goal-advice {
+  margin-top: 24px;
+  line-height: 1.7;
+}
+
+@media (max-width: 600px) {
+  .goal-planner-page {
+    padding: 24px 14px;
+  }
+
+  .goal-planner-header h1 {
+    font-size: 29px;
+  }
+
+  .goal-planner-form,
+  .goal-result {
+    padding: 20px;
+  }
+}
