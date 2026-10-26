@@ -1,5 +1,5 @@
 
-const API_BASE_URL = "https://goalinvest-advisor-project.onrender.com";
+const API_BASE_URL = "https://invest-advisory-api.onrender.com";
 
 // Helper function for API requests
 async function apiRequest(endpoint, options = {}) {
