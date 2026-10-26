@@ -10,7 +10,7 @@ from langchain_chroma import Chroma
 # Project folders
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
-CHROMA_DIR = BASE_DIR.parent / "chroma_db"
+CHROMA_DIR = BASE_DIR / "chroma_db"
 
 # Embedding model
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
